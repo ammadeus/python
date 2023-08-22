@@ -8,7 +8,7 @@ set WORKING_DIR=C:\Users\ammad\OneDrive\Desktop\python\teleg_bot
 set PYTHON_PATH=C:\Users\ammad\AppData\Local\Programs\Python\Python311\python.exe
 
 :: Imposta il token del bot
-set TOKEN=6656760098:AAFj8nWawhxGlJlV-tIVSN5TdYByNuH48yI
+
 
 :: Sposta il prompt nella cartella di lavoro
 cd /d "%WORKING_DIR%"
