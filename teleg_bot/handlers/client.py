@@ -1,9 +1,11 @@
 from aiogram import types, Dispatcher
 from create_bot import dp, bot
-from keyboards import kb_client, tools_inline_keyboard, production_keyboard, learning_inline_keyboard, about_us_inline_keyboard,question_about_us_inline_keyboard
+from keyboards import kb_client, tools_inline_keyboard, production_keyboard, learning_inline_keyboard, about_us_inline_keyboard, question_about_us_inline_keyboard, reviews_about_us_inline_keyboard, social_inline_keyboard
 from aiogram.types import ReplyKeyboardRemove
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher import FSMContext
+from aiogram.types import Message
+
 
 
     
@@ -66,18 +68,39 @@ async def adress_command(message : types.Message):
 #@dp.callback_query_handler(lambda query: query.data == 'questions about us')
 #async def question_about_us(callback_query: types.CallbackQuery):
     #await bot.send_message(callback_query.from_user.id, "Here's a new inline keyboard:", reply_markup=question_about_us_inline_keyboard)
-async def show_question_about_us_inline_keyboard(callback_query: types.CallbackQuery):
-    if callback_query.data == "questions about us":
-        await bot.send_message(
-            callback_query.from_user.id,
-            "Here's a new inline keyboard for questions about us:",
-            reply_markup=question_about_us_inline_keyboard,
-        )
+#async def show_question_about_us_inline_keyboard(callback_query: types.CallbackQuery):
+    #if callback_query.data == "questions about us":
+        #await bot.send_message(
+            #callback_query.from_user.id,
+            #"Here's a new inline keyboard for questions about us:",
+            #reply_markup=question_about_us_inline_keyboard,
+        #)
+ 
+ # keyboard question about us(About Us)     
+#@dp.message(F.text.lower() == 'questions about us')
+async def question_about_us_callback(query: types.CallbackQuery):
+    await query.answer()
+    await query.message.answer("Here's a new inline keyboard question about us:", reply_markup=question_about_us_inline_keyboard)
+ 
+    
+ # keyboard reviews about us(About Us)
+ #@dp.message(F.text.lower() == 'reviews_about_us')
+async def reviews_about_us_callback(query: types.CallbackQuery):
+    await query.answer()
+    await query.message.answer("Here's a new inline keyboard reviews about us:", reply_markup=reviews_about_us_inline_keyboard)
+   
+   
+ # keyboard social(About Us)
+ #@dp.message(F.text.lower() == 'social')
+async def social_callback(query: types.CallbackQuery):
+    await query.answer()
+    await query.message.answer("Here's a new inline keyboard social:", reply_markup=social_inline_keyboard)
+   
 
 
     
      
-
+ 
     
 
 
@@ -91,6 +114,9 @@ def register_handers_client(dp : Dispatcher):
     dp.register_message_handler(about_us_command, commands=["About"])
     dp.register_message_handler(open_command, commands=["Open"]) 
     dp.register_message_handler(adress_command, commands=["Address"])
-    dp.register_callback_query_handler(show_question_about_us_inline_keyboard, lambda query: query.data == 'questions about us')
+    dp.register_callback_query_handler(question_about_us_callback, text='questions about us')
+    dp.register_callback_query_handler(reviews_about_us_callback, text='reviews_about_us')
+    dp.register_callback_query_handler(social_callback, text='social')
+    #dp.register_callback_query_handler(show_question_about_us_inline_keyboard, lambda query: query.data == 'questions about us')
     #dp.register_message_handler(handle_production_choice)
     

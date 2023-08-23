@@ -47,24 +47,41 @@ learning_inline_keyboard = InlineKeyboardMarkup(resize_keyboard=True)
 learning_inline_keyboard.row(butt1).row(butt2)
 
 # inline keyboard del tasto About Us
-bt1 = InlineKeyboardButton(text="посилання на соц мереж", callback_data="bt1")
-bt2 = InlineKeyboardButton(text="questions about us", callback_data="bt2")
-bt3 = InlineKeyboardButton(text="відгуки про нас", callback_data="bt3")
+bt1 = InlineKeyboardButton(text="посилання на соц мереж", callback_data="social")
+bt2 = InlineKeyboardButton(text="questions about us", callback_data="questions about us")
+bt3 = InlineKeyboardButton(text="відгуки про нас", callback_data="reviews_about_us")
 
 about_us_inline_keyboard = InlineKeyboardMarkup(resize_keyboard=True)
 about_us_inline_keyboard.row(bt1).row(bt2).row(bt3)
 
 # inline keyboard question about us(About Us) 
-#abt1 = InlineKeyboardButton(text="question N.1", callback_data="abt1")
-#abt2 = InlineKeyboardButton(text="question N.2", callback_data="abt2")
-#abt3 = InlineKeyboardButton(text="question N.3", callback_data="abt3")
+abt1 = InlineKeyboardButton(text="question N.1", callback_data="abt1")
+abt2 = InlineKeyboardButton(text="question N.2", callback_data="abt2")
+abt3 = InlineKeyboardButton(text="question N.3", callback_data="abt3")
 
-#question_about_us_inline_keyboard = InlineKeyboardMarkup(resize_keyboard=True)
+question_about_us_inline_keyboard = InlineKeyboardMarkup(resize_keyboard=True)
+question_about_us_inline_keyboard.row(abt1).row(abt2).row(abt3)
 #question_about_us_inline_keyboard = types.InlineKeyboardButton("Show New Inline Keyboard", callback_data="question_about_us_inline_keyboard")
 # Inline keyboard per la nuova inline keyboard
 #question_about_us_inline_keyboard.add(types.InlineKeyboardButton("New Button 1", callback_data="new_button_1"))
 #question_about_us_inline_keyboard.add(types.InlineKeyboardButton("New Button 2", callback_data="new_button_2"))
 
-question_about_us_inline_keyboard = InlineKeyboardMarkup()
-question_about_us_inline_keyboard.add(InlineKeyboardButton("New Button 1", callback_data="new_button_1"))
-question_about_us_inline_keyboard.add(InlineKeyboardButton("New Button 2", callback_data="new_button_2"))
+#question_about_us_inline_keyboard = InlineKeyboardMarkup()
+#question_about_us_inline_keyboard.add(InlineKeyboardButton("New Button 1", callback_data="new_button_1"))
+#question_about_us_inline_keyboard.add(InlineKeyboardButton("New Button 2", callback_data="new_button_2"))
+
+# inline keyboard reviews about us(About Us)
+bbt1 = InlineKeyboardButton(text="question N.1", callback_data="bbt1")
+bbt2 = InlineKeyboardButton(text="question N.2", callback_data="bbt2")
+bbt3 = InlineKeyboardButton(text="question N.3", callback_data="bbt3")
+
+reviews_about_us_inline_keyboard = InlineKeyboardMarkup(resize_keyboard=True)
+reviews_about_us_inline_keyboard.row(bbt1).row(bbt2).row(bbt3)
+
+# inline keyboard social(About Us)
+cbt1 = InlineKeyboardButton(text="question N.1", callback_data="cbt1")
+cbt2 = InlineKeyboardButton(text="question N.2", callback_data="cbt2")
+cbt3 = InlineKeyboardButton(text="question N.3", callback_data="cbt3")
+
+social_inline_keyboard  = InlineKeyboardMarkup(resize_keyboard=True)
+social_inline_keyboard.row(cbt1).row(cbt2).row(cbt3)
