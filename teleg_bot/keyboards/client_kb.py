@@ -33,8 +33,8 @@ tools_inline_keyboard.row(button1, button2).row(button3, button4)
  # keybord del tasto Production diventa inline
 #but1 = KeyboardButton('/express виготовлення килимів')
 #but2 = KeyboardButton('/стандартне виготовлення килимів')
-but1 = InlineKeyboardButton(text="express виготовлення килимів", callback_data="but1")
-but2 = InlineKeyboardButton(text="стандартне виготовлення килимів", callback_data="but2")
+but1 = InlineKeyboardButton(text="express виготовлення килимів", callback_data="express production")
+but2 = InlineKeyboardButton(text="стандартне виготовлення килимів", callback_data="production")
 
 production_keyboard = InlineKeyboardMarkup(resize_keyboard=True)
 production_keyboard.row(but1).row(but2)
@@ -85,3 +85,13 @@ cbt3 = InlineKeyboardButton(text="question N.3", callback_data="cbt3")
 
 social_inline_keyboard  = InlineKeyboardMarkup(resize_keyboard=True)
 social_inline_keyboard.row(cbt1).row(cbt2).row(cbt3)
+
+# inline keyboard express_production(Production)
+
+dbt1 = InlineKeyboardButton(text="Insert long =", callback_data="dbt1")
+dbt2 = InlineKeyboardButton(text="Insert large =", callback_data="dbt2")
+dbt3 = InlineKeyboardButton(text="Howe many colours?", callback_data="dbt3")
+dbt4 = InlineKeyboardButton(text="Difficult step", callback_data="dbt3")
+
+express_production_inline_keyboard = InlineKeyboardMarkup(resize_keyboard=True)
+express_production_inline_keyboard.row(dbt1).row(dbt2).row(dbt3).row(dbt4)

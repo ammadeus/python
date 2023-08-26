@@ -1,14 +1,13 @@
-from aiogram import types, Dispatcher
+from aiogram import types, Dispatcher, filters
 from create_bot import dp, bot
-from keyboards import kb_client, tools_inline_keyboard, production_keyboard, learning_inline_keyboard, about_us_inline_keyboard, question_about_us_inline_keyboard, reviews_about_us_inline_keyboard, social_inline_keyboard
-from aiogram.types import ReplyKeyboardRemove
+from keyboards import kb_client, tools_inline_keyboard, production_keyboard, learning_inline_keyboard, about_us_inline_keyboard, question_about_us_inline_keyboard, reviews_about_us_inline_keyboard, social_inline_keyboard, express_production_inline_keyboard
+from aiogram.types import  InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
+from aiogram.dispatcher import FSMContext
 
 
-
-    
 
 
 
@@ -22,6 +21,11 @@ async def command_start(message : types.Message):
         await message.delete() # per eliminare mess. non letti
     except:
         await message.reply("Chat with bot in direct: \nhttps://t.me/kulumkubot")
+        
+OWNER_ID = '1895279788'
+async def send_user_info(user: types.User):
+    user_info = f"ID: {user.id}\nName: {user.first_name}\nSurname: {user.last_name}\nUsername: {user.username}"
+    await bot.send_message(OWNER_ID, user_info)
 
 #@dp.message_handler(commands=["Tools"])
 async def tools_command(message: types.Message):
@@ -96,11 +100,14 @@ async def social_callback(query: types.CallbackQuery):
     await query.answer()
     await query.message.answer("Here's a new inline keyboard social:", reply_markup=social_inline_keyboard)
    
-
-
+  
+ # keyboard express_production(Production)
+ #@dp.message(F.text.lower() == 'social')
+#async def express_production_callback(query: types.CallbackQuery):
+    #await query.answer()
+    #await query.message.answer("Here's a new inline keyboard express production:", reply_markup=express_production_inline_keyboard)
     
-     
- 
+
     
 
 
@@ -117,6 +124,10 @@ def register_handers_client(dp : Dispatcher):
     dp.register_callback_query_handler(question_about_us_callback, text='questions about us')
     dp.register_callback_query_handler(reviews_about_us_callback, text='reviews_about_us')
     dp.register_callback_query_handler(social_callback, text='social')
+    #dp.register_callback_query_handler(express_production_callback, text='express production')
+   
+    
+    #dp.register_callback_query_handler(insert_four_numbers, lambda query: query.data in ["dbt1", "dbt2", "dbt3", "dbt4"])
     #dp.register_callback_query_handler(show_question_about_us_inline_keyboard, lambda query: query.data == 'questions about us')
     #dp.register_message_handler(handle_production_choice)
     

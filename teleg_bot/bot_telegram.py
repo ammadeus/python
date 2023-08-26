@@ -8,9 +8,11 @@ from create_bot import dp
 async def on_startup(_):
     print("Bot Online!")
     
-from handlers import client, admin, other
+from handlers import client, state,state_express, other
 
 client.register_handers_client(dp)
+state.register_handlers_state(dp)
+state_express.register_handlers_state_express(dp)
 
     
 
