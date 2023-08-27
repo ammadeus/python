@@ -2,6 +2,8 @@ from aiogram import types, Dispatcher
 from create_bot import dp
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
+from aiogram.dispatcher.filters import Text 
+
 
 
 # EXPRESS PRODUCTION
@@ -26,6 +28,18 @@ async def load_length_express(message : types.Message, state: FSMContext):
         data['length_express'] = float(message.text)
         await FSMState.next()
         await message.reply('Digit width.')
+        
+        
+# testo per uscire dallo stato FSM
+#@dp.message_handler(state="*", commands='Delete')
+#@dp.message_hamdler(Text(equals='delete', ignore_case=True), state="*")
+async def cancel_handler_express(message: types.Message, state: FSMContext):
+    current_state = await state.get_state()
+    if current_state is None:
+         return
+    await state.finish()
+    await message.reply('Deleted.')
+        
         
 
 # catturiamo la seconda risposta della largezza
@@ -62,6 +76,8 @@ async def load_step_difficult_express(message : types.Message, state: FSMContext
 def register_handlers_state_express(dp : Dispatcher):
     dp.register_callback_query_handler(cm_start_express, text="express production", state=None)
     dp.register_message_handler(load_length_express, state=FSMState.length_express)
+    dp.register_message_handler(cancel_handler_express, state="*", commands='Delete')
+    dp.register_message_handler(cancel_handler_express, Text(equals='delete', ignore_case=True), state="*")
     dp.register_message_handler(load_width_express, state=FSMState.width_express)
     dp.register_message_handler(load_color_quantity_express, state=FSMState.color_quantity_express)
     dp.register_message_handler(load_step_difficult_express, state=FSMState.step_difficult_express)
