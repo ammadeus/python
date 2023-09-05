@@ -12,7 +12,8 @@ CREATE TABLE Rooms (
     price DECIMAL(10, 2),
     has_ac VARCHAR(3),
     has_refrigerator VARCHAR(3),
-    other_room_attributes TEXT
+    other_room_attributes TEXT,
+    FOREIGN KEY (host_id) REFERENCES Users(user_id)
 );
 
 CREATE TABLE Reservations (
@@ -20,7 +21,9 @@ CREATE TABLE Reservations (
     guest_id INT,
     room_id INT,
     check_in_date DATE,
-    check_out_date DATE
+    check_out_date DATE,
+    FOREIGN KEY (guest_id) REFERENCES Users(user_id),
+    FOREIGN KEY (room_id) REFERENCES Rooms(room_id)
 );
 
 CREATE TABLE Reviews (
@@ -28,7 +31,9 @@ CREATE TABLE Reviews (
     guest_id INT,
     room_id INT,
     rating INT,
-    comment TEXT
+    comment TEXT,
+    FOREIGN KEY (guest_id) REFERENCES Users(user_id),
+    FOREIGN KEY (room_id) REFERENCES Rooms(room_id)
 );
 
 
