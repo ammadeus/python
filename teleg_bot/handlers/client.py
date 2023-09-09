@@ -6,6 +6,7 @@ from aiogram.dispatcher.filters import Text
 from aiogram.dispatcher import FSMContext
 from aiogram.types import Message
 from aiogram.dispatcher import FSMContext
+from data_base import sqlite_db
 
 
 
@@ -22,10 +23,6 @@ async def command_start(message : types.Message):
     except:
         await message.reply("Chat with bot in direct: \nhttps://t.me/kulumkubot")
         
-OWNER_ID = '1895279788'
-async def send_user_info(user: types.User):
-    user_info = f"ID: {user.id}\nName: {user.first_name}\nSurname: {user.last_name}\nUsername: {user.username}"
-    await bot.send_message(OWNER_ID, user_info)
 
 #@dp.message_handler(commands=["Tools"])
 async def tools_command(message: types.Message):
@@ -100,17 +97,28 @@ async def social_callback(query: types.CallbackQuery):
     await query.answer()
     await query.message.answer("Here's a new inline keyboard social:", reply_markup=social_inline_keyboard)
    
-  
+ 
+#@dp.message_handler(commands=['Shop'])
+async def shop_command(message : types.Message):
+    await sqlite_db.sql_read(message)
+     
  # keyboard express_production(Production)
  #@dp.message(F.text.lower() == 'social')
 #async def express_production_callback(query: types.CallbackQuery):
     #await query.answer()
     #await query.message.answer("Here's a new inline keyboard express production:", reply_markup=express_production_inline_keyboard)
     
-
+    
+    
+    
     
 
-
+    
+#deve essere l'ultimo , perche lavora come echo
+#@dp.message_handler(state="*")
+#async def empty(message : types.Message):
+    #await message.answer('Please press any button bellow to speak with bot or press help to contact us')
+    #await message.delete() 
 
 def register_handers_client(dp : Dispatcher):
     dp.register_message_handler(command_start, commands=['start', 'help'])
@@ -124,6 +132,10 @@ def register_handers_client(dp : Dispatcher):
     dp.register_callback_query_handler(question_about_us_callback, text='questions about us')
     dp.register_callback_query_handler(reviews_about_us_callback, text='reviews_about_us')
     dp.register_callback_query_handler(social_callback, text='social')
+    dp.register_message_handler(shop_command, commands=['Shop'])
+    
+    
+    #dp.register_message_handler(empty, state="*")
     #dp.register_callback_query_handler(express_production_callback, text='express production')
    
     

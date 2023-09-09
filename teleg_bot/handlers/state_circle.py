@@ -13,9 +13,8 @@ def init_gspread_client():
     return gspread.service_account(filename=creds_filename)
 
 
-class FSMState(StatesGroup):
-    length = State()
-    width = State()
+class FSMState_c(StatesGroup):
+    circle = State()
     color_quantity = State()
     step_difficult = State()
     digit_your_name = State()
@@ -25,16 +24,16 @@ class FSMState(StatesGroup):
 # da dove parte FSM 
 #@dp.message_handler(text="production", state=None)
 async def cm_start(query: types.CallbackQuery):
-    await FSMState.length.set()
-    await query.message.reply('Digit lenght')
+    await FSMState_c.circle.set()
+    await query.message.reply('Digit circle')
     await query.answer()
 # catturiamo la prima risposta della lungezza
-#@dp.message_handler(state=FSMState.length)
-async def load_length(message : types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data['length'] = float(message.text)
-        await FSMState.next()
-        await message.reply('Digit width.')
+#@dp.message_handler(state=FSMState.circle)
+async def load_circle(message : types.Message, state: FSMContext):
+    async with state.proxy() as data_c:
+        data_c['circle'] = float(message.text)
+        await FSMState_c.next()
+        await message.reply('Digit color quantity.')
         
         
 # testo per uscire dallo stato FSM
@@ -49,22 +48,12 @@ async def cancel_handler(message: types.Message, state: FSMContext):
         
         
         
-
-# catturiamo la seconda risposta della largezza
-#@dp.message_handler( state=FSMState.width)
-async def load_width(message : types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data['width'] = float(message.text)
-        await FSMState.next()
-        await message.reply('Digit color quantity.')
-        
-        
 # catturiamo la terza risposta della color_quantity
 #@dp.message_handler(state=FSMState.color_quantity)
 async def load_color_quantity(message : types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data['color_quantity'] = float(message.text)
-        await FSMState.next()
+    async with state.proxy() as data_c:
+        data_c['color_quantity'] = float(message.text)
+        await FSMState_c.next()
         await message.reply('Digit color step difficult.')
         
         
@@ -72,29 +61,29 @@ async def load_color_quantity(message : types.Message, state: FSMContext):
 # catturiamo la terza risposta della color_quantity
 #@dp.message_handler(state=FSMState.step_difficult)
 async def load_step_difficult(message : types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data['step_difficult'] = float(message.text)
-        await FSMState.next()
+    async with state.proxy() as data_c:
+        data_c['step_difficult'] = float(message.text)
+        await FSMState_c.next()
         await message.reply('Digit your name.')
         
 # catturiamo la terza risposta della color_quantity
 #@dp.message_handler(state=FSMState.digit_your_name)
 async def load_digit_your_name(message : types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data['digit_your_name'] = str(message.text)
-        await FSMState.next()
+    async with state.proxy() as data_c:
+        data_c['digit_your_name'] = str(message.text)
+        await FSMState_c.next()
         await message.reply('Digit your phone number.')
         
 # catturiamo la terza risposta della color_quantity
 #@dp.message_handler(state=FSMState.digit_your_number)
 async def load_digit_your_number(message : types.Message, state: FSMContext):
-    async with state.proxy() as data:
-        data['digit_your_number'] = int(message.text)
+    async with state.proxy() as data_c:
+        data_c['digit_your_number'] = int(message.text)
         
         # scrivo i dati nel foglio di lavoro
-        async def write_to_google_sheets(data):
+        async def write_to_google_sheets(data_c):
             gc = init_gspread_client()
-            sheet_id = "1ipMDxyuk8U2syXBlg6ZyLoFlLqoeeWEszC2Nw9vWoP0"
+            sheet_id = "1iDhmQAPtu6GuatI4Mk0vJ_G8XWlwmPmDEo2PcpQx5hw"
             sheet = gc.open_by_key(sheet_id).sheet1
             await message.answer("Scrivo i dati nel foglio di lavoro...")
             current_date = datetime.datetime.now().strftime("%d-%m-%Y")
@@ -107,17 +96,15 @@ async def load_digit_your_number(message : types.Message, state: FSMContext):
                 next_number = 1
             values_to_write = [
             #["length", "width", "color_quantity", "step_difficult"],
-            [current_date, next_number,data['length'], data['width'], data['color_quantity'], data['step_difficult'], data['digit_your_name'], data['digit_your_number']]
+            [current_date, next_number,data_c['circle'], data_c['color_quantity'], data_c['step_difficult'], data_c['digit_your_name'], data_c['digit_your_number']]
             ]
             sheet.insert_rows(values_to_write, 2)
             await message.answer(
-                        f"Lei ha inserito length: {data['length']}, "
-                        f"width: {data['width']}, "
-                        f"color_quantity: {data['color_quantity']}, "
-                        f"step_difficult: {data['step_difficult']}"
+                        f"Lei ha inserito circle: {data_c['circle']}, "
+                        f"color_quantity: {data_c['color_quantity']}, "
+                        f"step_difficult: {data_c['step_difficult']}"
                     )
-
-        await write_to_google_sheets(data)
+        await write_to_google_sheets(data_c)
         #await message.reply(str(data))   
         await state.finish()
         
@@ -126,13 +113,12 @@ async def load_digit_your_number(message : types.Message, state: FSMContext):
     ###############################################################
 
 # registrazione dei handlers
-def register_handlers_state(dp : Dispatcher):
-    dp.register_callback_query_handler(cm_start, text="production1", state=None)
-    dp.register_message_handler(load_length, state=FSMState.length)
+def register_handlers_state_circle(dp : Dispatcher):
+    dp.register_callback_query_handler(cm_start, text="production", state=None)
+    dp.register_message_handler(load_circle, state=FSMState_c.circle)
     dp.register_message_handler(cancel_handler, state="*", commands='Delete')
     dp.register_message_handler(cancel_handler, Text(equals='delete', ignore_case=True), state="*")
-    dp.register_message_handler(load_width, state=FSMState.width)
-    dp.register_message_handler(load_color_quantity, state=FSMState.color_quantity)
-    dp.register_message_handler(load_step_difficult, state=FSMState.step_difficult)
-    dp.register_message_handler(load_digit_your_name, state=FSMState.digit_your_name)
-    dp.register_message_handler(load_digit_your_number, state=FSMState.digit_your_number)
+    dp.register_message_handler(load_color_quantity, state=FSMState_c.color_quantity)
+    dp.register_message_handler(load_step_difficult, state=FSMState_c.step_difficult)
+    dp.register_message_handler(load_digit_your_name, state=FSMState_c.digit_your_name)
+    dp.register_message_handler(load_digit_your_number, state=FSMState_c.digit_your_number)

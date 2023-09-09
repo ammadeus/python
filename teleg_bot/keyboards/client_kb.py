@@ -5,7 +5,7 @@ from aiogram import types
 b1 = KeyboardButton('/Learning')
 b2 = KeyboardButton('/Production')
 b3 = KeyboardButton('/Tools')
-b4 = KeyboardButton('/Open')
+b4 = KeyboardButton('/Shop')
 b5 = KeyboardButton('/Address')
 b6 = KeyboardButton('/About Us')
 
