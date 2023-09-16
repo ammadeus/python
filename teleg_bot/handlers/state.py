@@ -1,5 +1,5 @@
 from aiogram import types, Dispatcher
-from create_bot import dp
+from create_bot import dp, bot
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.filters import Text 
@@ -16,8 +16,9 @@ def init_gspread_client():
 class FSMState(StatesGroup):
     length = State()
     width = State()
-    color_quantity = State()
     step_difficult = State()
+    color_quantity = State()
+    production = State()
     digit_your_name = State()
     digit_your_number = State()
     
@@ -35,6 +36,12 @@ async def load_length(message : types.Message, state: FSMContext):
         data['length'] = float(message.text)
         await FSMState.next()
         await message.reply('Digit width.')
+    list_photos = [
+            types.InputMediaPhoto(types.InputFile('img/1.jpg')),
+            types.InputMediaPhoto(types.InputFile('img/2.1.jpg')),
+            types.InputMediaPhoto(types.InputFile('img/3.jpg')),
+        ]
+    await message.answer_media_group(list_photos)
         
         
 # testo per uscire dallo stato FSM
@@ -56,16 +63,17 @@ async def load_width(message : types.Message, state: FSMContext):
     async with state.proxy() as data:
         data['width'] = float(message.text)
         await FSMState.next()
-        await message.reply('Digit color quantity.')
+        await message.reply('Digit color step difficult.')
+        
         
         
 # catturiamo la terza risposta della color_quantity
 #@dp.message_handler(state=FSMState.color_quantity)
 async def load_color_quantity(message : types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['color_quantity'] = float(message.text)
+        data['step_difficult'] = int(message.text)
         await FSMState.next()
-        await message.reply('Digit color step difficult.')
+        await message.reply('Digit normal or express production.')
         
         
 
@@ -73,7 +81,15 @@ async def load_color_quantity(message : types.Message, state: FSMContext):
 #@dp.message_handler(state=FSMState.step_difficult)
 async def load_step_difficult(message : types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['step_difficult'] = float(message.text)
+        data['color_quantity'] = int(message.text)
+        await FSMState.next()
+        await message.reply('Digit color number.')
+        
+# catturiamo la terza risposta della color_quantity
+#@dp.message_handler(state=FSMState.step_difficult)
+async def load_production(message : types.Message, state: FSMContext):
+    async with state.proxy() as data:
+        data['production'] = str(message.text)
         await FSMState.next()
         await message.reply('Digit your name.')
         
@@ -106,15 +122,16 @@ async def load_digit_your_number(message : types.Message, state: FSMContext):
             else:
                 next_number = 1
             values_to_write = [
-            #["length", "width", "color_quantity", "step_difficult"],
-            [current_date, next_number,data['length'], data['width'], data['color_quantity'], data['step_difficult'], data['digit_your_name'], data['digit_your_number']]
+            [current_date, next_number,data['length'], data['width'], data['color_quantity'], data['step_difficult'], data['production'], data['digit_your_name'], data['digit_your_number']]
             ]
             sheet.insert_rows(values_to_write, 2)
             await message.answer(
-                        f"Lei ha inserito length: {data['length']}, "
-                        f"width: {data['width']}, "
-                        f"color_quantity: {data['color_quantity']}, "
-                        f"step_difficult: {data['step_difficult']}"
+                        f"caro {data['digit_your_name']} Lei ha inserito:\n"
+                        f"length: {data['length']}\n"
+                        f"width: {data['width']}\n"
+                        f"step_difficult: {data['step_difficult']}\n"
+                        f"color_quantity: {data['color_quantity']}\n"
+                        f"produzione: {data['production']}\n"
                     )
 
         await write_to_google_sheets(data)
@@ -127,12 +144,13 @@ async def load_digit_your_number(message : types.Message, state: FSMContext):
 
 # registrazione dei handlers
 def register_handlers_state(dp : Dispatcher):
-    dp.register_callback_query_handler(cm_start, text="production1", state=None)
+    dp.register_callback_query_handler(cm_start, text="express production", state=None)
     dp.register_message_handler(load_length, state=FSMState.length)
     dp.register_message_handler(cancel_handler, state="*", commands='Delete')
     dp.register_message_handler(cancel_handler, Text(equals='delete', ignore_case=True), state="*")
     dp.register_message_handler(load_width, state=FSMState.width)
-    dp.register_message_handler(load_color_quantity, state=FSMState.color_quantity)
     dp.register_message_handler(load_step_difficult, state=FSMState.step_difficult)
+    dp.register_message_handler(load_color_quantity, state=FSMState.color_quantity)
+    dp.register_message_handler(load_production, state=FSMState.production)
     dp.register_message_handler(load_digit_your_name, state=FSMState.digit_your_name)
     dp.register_message_handler(load_digit_your_number, state=FSMState.digit_your_number)

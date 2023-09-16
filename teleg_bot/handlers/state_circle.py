@@ -15,8 +15,9 @@ def init_gspread_client():
 
 class FSMState_c(StatesGroup):
     circle = State()
-    color_quantity = State()
     step_difficult = State()
+    color_quantity = State()
+    production = State()
     digit_your_name = State()
     digit_your_number = State()
     
@@ -31,9 +32,18 @@ async def cm_start(query: types.CallbackQuery):
 #@dp.message_handler(state=FSMState.circle)
 async def load_circle(message : types.Message, state: FSMContext):
     async with state.proxy() as data_c:
-        data_c['circle'] = float(message.text)
-        await FSMState_c.next()
-        await message.reply('Digit color quantity.')
+        try:
+            data_c['circle'] = float(message.text)
+            await FSMState_c.next()
+            await message.reply('Digit color step difficult.')
+        except ValueError:
+            await message.reply('scrivi un numero!')
+    list_photos_ = [
+            types.InputMediaPhoto(types.InputFile('img/1.jpg')),
+            types.InputMediaPhoto(types.InputFile('img/2.1.jpg')),
+            types.InputMediaPhoto(types.InputFile('img/3.jpg')),
+        ]
+    await message.answer_media_group(list_photos_)
         
         
 # testo per uscire dallo stato FSM
@@ -52,34 +62,58 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 #@dp.message_handler(state=FSMState.color_quantity)
 async def load_color_quantity(message : types.Message, state: FSMContext):
     async with state.proxy() as data_c:
-        data_c['color_quantity'] = float(message.text)
-        await FSMState_c.next()
-        await message.reply('Digit color step difficult.')
-        
+        try:
+            data_c['step_difficult'] = int(message.text)
+            await FSMState_c.next()
+            await message.reply('Digit normal or express production.')
+        except ValueError:
+            await message.reply('scrivi un numero!')
         
 
 # catturiamo la terza risposta della color_quantity
 #@dp.message_handler(state=FSMState.step_difficult)
 async def load_step_difficult(message : types.Message, state: FSMContext):
     async with state.proxy() as data_c:
-        data_c['step_difficult'] = float(message.text)
-        await FSMState_c.next()
-        await message.reply('Digit your name.')
-        
+        try:
+            data_c['color_quantity'] = int(message.text)
+            await FSMState_c.next()
+            await message.reply('Digit color quantity.')
+        except ValueError:
+            await message.reply('scrivi un numero!')
+            
+async def load_production(message : types.Message, state: FSMContext):
+    async with state.proxy() as data_c:
+        try:
+            data_c['production'] = str(message.text)
+            await FSMState_c.next()
+            await message.reply('Digit your name.')
+        except ValueError:
+            await message.reply('scrivi la parola!')
 # catturiamo la terza risposta della color_quantity
 #@dp.message_handler(state=FSMState.digit_your_name)
 async def load_digit_your_name(message : types.Message, state: FSMContext):
     async with state.proxy() as data_c:
-        data_c['digit_your_name'] = str(message.text)
-        await FSMState_c.next()
-        await message.reply('Digit your phone number.')
-        
+        try:
+            data_c['digit_your_name'] = str(message.text)
+            await FSMState_c.next()
+            await message.reply('Digit your phone number.')
+        except ValueError:
+            await message.reply('scrivi un nome!')
+            
 # catturiamo la terza risposta della color_quantity
 #@dp.message_handler(state=FSMState.digit_your_number)
 async def load_digit_your_number(message : types.Message, state: FSMContext):
     async with state.proxy() as data_c:
-        data_c['digit_your_number'] = int(message.text)
-        
+        count = 0
+        while True:
+            try:
+                data_c = int(message.text)
+                data_c['digit_your_number'] = data_c
+                break
+            except ValueError:
+                await message.answer('Inserisci un numero di telefono valido.')
+                count += 1
+            
         # scrivo i dati nel foglio di lavoro
         async def write_to_google_sheets(data_c):
             gc = init_gspread_client()
@@ -96,13 +130,15 @@ async def load_digit_your_number(message : types.Message, state: FSMContext):
                 next_number = 1
             values_to_write = [
             #["length", "width", "color_quantity", "step_difficult"],
-            [current_date, next_number,data_c['circle'], data_c['color_quantity'], data_c['step_difficult'], data_c['digit_your_name'], data_c['digit_your_number']]
+            [current_date, next_number,data_c['circle'], data_c['color_quantity'], data_c['step_difficult'], data_c['production'], data_c['digit_your_name'], data_c['digit_your_number']]
             ]
             sheet.insert_rows(values_to_write, 2)
             await message.answer(
-                        f"Lei ha inserito circle: {data_c['circle']}, "
-                        f"color_quantity: {data_c['color_quantity']}, "
-                        f"step_difficult: {data_c['step_difficult']}"
+                        f"caro {data_c['digit_your_name']} Lei ha inserito:\n"
+                        f"circle: {data_c['circle']}\n"
+                        f"step_difficult: {data_c['step_difficult']}\n"
+                        f"color_quantity: {data_c['color_quantity']}\n"
+                        f"produzione: {data_c['production']}\n"
                     )
         await write_to_google_sheets(data_c)
         #await message.reply(str(data))   
@@ -118,7 +154,8 @@ def register_handlers_state_circle(dp : Dispatcher):
     dp.register_message_handler(load_circle, state=FSMState_c.circle)
     dp.register_message_handler(cancel_handler, state="*", commands='Delete')
     dp.register_message_handler(cancel_handler, Text(equals='delete', ignore_case=True), state="*")
-    dp.register_message_handler(load_color_quantity, state=FSMState_c.color_quantity)
     dp.register_message_handler(load_step_difficult, state=FSMState_c.step_difficult)
+    dp.register_message_handler(load_color_quantity, state=FSMState_c.color_quantity)
+    dp.register_message_handler(load_production, state=FSMState_c.production)
     dp.register_message_handler(load_digit_your_name, state=FSMState_c.digit_your_name)
     dp.register_message_handler(load_digit_your_number, state=FSMState_c.digit_your_number)
