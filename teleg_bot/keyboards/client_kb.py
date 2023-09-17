@@ -12,6 +12,15 @@ b6 = KeyboardButton('/About Us')
 kb_client  = ReplyKeyboardMarkup(resize_keyboard=True,one_time_keyboard=True)# scompare dopo che premi su
 kb_client.row(b1, b2, b3).row(b4, b5, b6)
 
+button1_in = InlineKeyboardButton(text="НАВЧАННЯ ТА ПОСЛУГИ", callback_data="button1_in")
+button2_in = InlineKeyboardButton(text="МАГАЗИН", callback_data="button2_in")
+button3_in = InlineKeyboardButton(text="ЗАМОВИТИ КИЛИМОК", callback_data="button3_in")
+button4_in = InlineKeyboardButton(text="ПРО НАС", callback_data="button4_in")
+
+client_inline_keyboard = InlineKeyboardMarkup(resize_keyboard=True)
+client_inline_keyboard.row(button1_in, button2_in).row(button3_in, button4_in) 
+
+
 # keyboard inline del tasto tools
 button1 = InlineKeyboardButton(text="price list на інструменти", callback_data="button1")
 button2 = InlineKeyboardButton(text="знижки на інструменти", callback_data="button2")
@@ -33,8 +42,8 @@ tools_inline_keyboard.row(button1, button2).row(button3, button4)
  # keybord del tasto Production diventa inline
 #but1 = KeyboardButton('/express виготовлення килимів')
 #but2 = KeyboardButton('/стандартне виготовлення килимів')
-but1 = InlineKeyboardButton(text="express виготовлення килимів", callback_data="express production")
-but2 = InlineKeyboardButton(text="стандартне виготовлення килимів", callback_data="production")
+but1 = InlineKeyboardButton(text="виробництво прямокутних килимків", callback_data="express production")
+but2 = InlineKeyboardButton(text="виробництво круглих килимків", callback_data="production")
 
 production_keyboard = InlineKeyboardMarkup(resize_keyboard=True)
 production_keyboard.row(but1).row(but2)

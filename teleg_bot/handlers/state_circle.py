@@ -1,5 +1,5 @@
 from aiogram import types, Dispatcher
-from create_bot import dp
+from create_bot import dp, bot
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.filters import Text 
@@ -7,6 +7,7 @@ from aiogram.dispatcher.filters import Text
 import gspread
 from gspread import Client
 import datetime
+import re
 
 def init_gspread_client():
     creds_filename = 'nome_del_tuo_file_di_credenziali.json'
@@ -26,7 +27,7 @@ class FSMState_c(StatesGroup):
 #@dp.message_handler(text="production", state=None)
 async def cm_start(query: types.CallbackQuery):
     await FSMState_c.circle.set()
-    await query.message.reply('Digit circle')
+    await query.message.reply('Вітаю, звідси можна почати ваш запит на отримання пропозиції для круглого килимка. Будь ласка, вкажіть бажаний діаметр килимка.')
     await query.answer()
 # catturiamo la prima risposta della lungezza
 #@dp.message_handler(state=FSMState.circle)
@@ -35,14 +36,18 @@ async def load_circle(message : types.Message, state: FSMContext):
         try:
             data_c['circle'] = float(message.text)
             await FSMState_c.next()
-            await message.reply('Digit color step difficult.')
         except ValueError:
             await message.reply('scrivi un numero!')
+            return
+
+    await message.reply('Digit color step difficult.')
+    await message.answer('oooook')
+
     list_photos_ = [
-            types.InputMediaPhoto(types.InputFile('img/1.jpg')),
-            types.InputMediaPhoto(types.InputFile('img/2.1.jpg')),
-            types.InputMediaPhoto(types.InputFile('img/3.jpg')),
-        ]
+        types.InputMediaPhoto(types.InputFile('img/1.jpg')),
+        types.InputMediaPhoto(types.InputFile('img/2.1.jpg')),
+        types.InputMediaPhoto(types.InputFile('img/3.jpg')),
+    ]
     await message.answer_media_group(list_photos_)
         
         
@@ -65,55 +70,68 @@ async def load_color_quantity(message : types.Message, state: FSMContext):
         try:
             data_c['step_difficult'] = int(message.text)
             await FSMState_c.next()
-            await message.reply('Digit normal or express production.')
         except ValueError:
             await message.reply('scrivi un numero!')
+        await message.reply('Digit normal or express production.')
+        await message.answer('oooook')
         
 
 # catturiamo la terza risposta della color_quantity
 #@dp.message_handler(state=FSMState.step_difficult)
 async def load_step_difficult(message : types.Message, state: FSMContext):
     async with state.proxy() as data_c:
-        try:
-            data_c['color_quantity'] = int(message.text)
-            await FSMState_c.next()
-            await message.reply('Digit color quantity.')
-        except ValueError:
-            await message.reply('scrivi un numero!')
+        pattern = r'^[0-9]+$'
+        match = re.match(pattern, message.text)
+        if not match or int(message.text) <= 0:
+            await message.answer('Inserisci un numero di colori valido.')
+            return
+        data_c['color_quantity'] = int(message.text)
+        await FSMState_c.next()
+        await message.reply('Digit color quantity.')
+        await message.reply('Digit normal or express production.')
             
 async def load_production(message : types.Message, state: FSMContext):
     async with state.proxy() as data_c:
-        try:
-            data_c['production'] = str(message.text)
-            await FSMState_c.next()
-            await message.reply('Digit your name.')
-        except ValueError:
-            await message.reply('scrivi la parola!')
+        pattern = r'^[a-zA-Z0-9\s]*$'
+        match = re.match(pattern, message.text)
+        if not match:
+            await message.answer('Inserisci una produzione valida.')
+            return
+        data_c['production'] = str(message.text)
+        await FSMState_c.next()
+        await message.reply('Digit your name.')
+        await message.reply('Digit normal or express production.')
+        
 # catturiamo la terza risposta della color_quantity
 #@dp.message_handler(state=FSMState.digit_your_name)
 async def load_digit_your_name(message : types.Message, state: FSMContext):
-    async with state.proxy() as data_c:
-        try:
-            data_c['digit_your_name'] = str(message.text)
-            await FSMState_c.next()
-            await message.reply('Digit your phone number.')
-        except ValueError:
-            await message.reply('scrivi un nome!')
+    async with state.proxy() as data:
+        pattern = r'^[a-zA-Z]+[a-zA-Z\s]*$'
+        match = re.match(pattern, message.text)
+        if not match:
+            await message.answer('Inserisci un nome valido.')
+            return
+
+        data['digit_your_name'] = str(message.text)
+        await FSMState_c.next()
+        await message.reply('scrivi il numero tel +38_________!')
+        await message.reply('Digit normal or express production.')
             
 # catturiamo la terza risposta della color_quantity
 #@dp.message_handler(state=FSMState.digit_your_number)
 async def load_digit_your_number(message : types.Message, state: FSMContext):
     async with state.proxy() as data_c:
-        count = 0
-        while True:
-            try:
-                data_c = int(message.text)
-                data_c['digit_your_number'] = data_c
-                break
-            except ValueError:
-                await message.answer('Inserisci un numero di telefono valido.')
-                count += 1
-            
+        pattern = r'^(\+38)?[0-9]{10}$'
+        match = re.match(pattern, message.text)
+        if not match:
+            await message.answer('Inserisci un numero di telefono valido.')
+            return
+
+        try:
+            data_c['digit_your_number'] = int(match.group(0))
+        except ValueError:
+            await message.answer('Il numero di telefono inserito non è valido.')
+            return
         # scrivo i dati nel foglio di lavoro
         async def write_to_google_sheets(data_c):
             gc = init_gspread_client()

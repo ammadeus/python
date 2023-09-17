@@ -3,7 +3,7 @@ from create_bot import dp, bot
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.dispatcher.filters import Text 
-
+import re
 import gspread
 from gspread import Client
 import datetime
@@ -33,16 +33,13 @@ async def cm_start(query: types.CallbackQuery):
 #@dp.message_handler(state=FSMState.length)
 async def load_length(message : types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['length'] = float(message.text)
-        await FSMState.next()
+        try:
+            data['length'] = float(message.text)
+            await FSMState.next()
+        except ValueError:
+            await message.reply('Digit a number!')
         await message.reply('Digit width.')
-    list_photos = [
-            types.InputMediaPhoto(types.InputFile('img/1.jpg')),
-            types.InputMediaPhoto(types.InputFile('img/2.1.jpg')),
-            types.InputMediaPhoto(types.InputFile('img/3.jpg')),
-        ]
-    await message.answer_media_group(list_photos)
-        
+        await message.answer('oooook')
         
 # testo per uscire dallo stato FSM
 #@dp.message_handler(state="*", commands='Delete')
@@ -59,21 +56,36 @@ async def cancel_handler(message: types.Message, state: FSMContext):
 
 # catturiamo la seconda risposta della largezza
 #@dp.message_handler( state=FSMState.width)
-async def load_width(message : types.Message, state: FSMContext):
+async def load_width(message: types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['width'] = float(message.text)
-        await FSMState.next()
-        await message.reply('Digit color step difficult.')
-        
+        try:
+            data['width'] = float(message.text)
+            await FSMState.next()
+        except ValueError:
+            await message.reply('Digit a number!')
+            return
+
+    await message.reply('Digit color step difficult.')
+
+    list_photos = [
+        types.InputMediaPhoto(types.InputFile('img/1.jpg')),
+        types.InputMediaPhoto(types.InputFile('img/2.1.jpg')),
+        types.InputMediaPhoto(types.InputFile('img/3.jpg')),
+    ]
+    await message.answer_media_group(list_photos)  
         
         
 # catturiamo la terza risposta della color_quantity
 #@dp.message_handler(state=FSMState.color_quantity)
 async def load_color_quantity(message : types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['step_difficult'] = int(message.text)
-        await FSMState.next()
+        try:
+            data['step_difficult'] = int(message.text)
+            await FSMState.next()
+        except ValueError:
+            await message.reply('Digit a number!')
         await message.reply('Digit normal or express production.')
+        await message.answer('oooook')
         
         
 
@@ -81,31 +93,59 @@ async def load_color_quantity(message : types.Message, state: FSMContext):
 #@dp.message_handler(state=FSMState.step_difficult)
 async def load_step_difficult(message : types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['color_quantity'] = int(message.text)
-        await FSMState.next()
+        try:
+            data['color_quantity'] = int(message.text)
+            await FSMState.next()
+        except ValueError :
+            await message.answer('digit valid step number')
         await message.reply('Digit color number.')
+        await message.answer('oooook')
         
 # catturiamo la terza risposta della color_quantity
 #@dp.message_handler(state=FSMState.step_difficult)
 async def load_production(message : types.Message, state: FSMContext):
     async with state.proxy() as data:
+        pattern = r'^[a-zA-Z0-9\s]*$'
+        match = re.match(pattern, message.text)
+        if not match:
+            await message.answer('Inserisci una produzione valida.')
+            return
+        
         data['production'] = str(message.text)
         await FSMState.next()
         await message.reply('Digit your name.')
+        await message.answer('oooook')
         
 # catturiamo la terza risposta della color_quantity
 #@dp.message_handler(state=FSMState.digit_your_name)
 async def load_digit_your_name(message : types.Message, state: FSMContext):
     async with state.proxy() as data:
+        pattern = r'^[a-zA-Z]+[a-zA-Z\s]*$'
+        match = re.match(pattern, message.text)
+        if not match:
+            await message.answer('Inserisci un nome valido.')
+            return
+
         data['digit_your_name'] = str(message.text)
         await FSMState.next()
-        await message.reply('Digit your phone number.')
+        await message.reply('Digit your phone number +38____---______.')
+        await message.answer('oooook')
         
 # catturiamo la terza risposta della color_quantity
 #@dp.message_handler(state=FSMState.digit_your_number)
 async def load_digit_your_number(message : types.Message, state: FSMContext):
     async with state.proxy() as data:
-        data['digit_your_number'] = int(message.text)
+        pattern = r'^(\+38)?[0-9]{10}$'
+        match = re.match(pattern, message.text)
+        if not match:
+            await message.answer('Inserisci un numero di telefono valido.')
+            return
+
+        try:
+            data['digit_your_number'] = int(match.group(0))
+        except ValueError:
+            await message.answer('Il numero di telefono inserito non è valido.')
+            return
         
         # scrivo i dati nel foglio di lavoro
         async def write_to_google_sheets(data):

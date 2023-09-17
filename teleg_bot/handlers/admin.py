@@ -104,7 +104,7 @@ async def delete_item(message: types.Message):
 def register_handlers_state_ad(dp : Dispatcher):
     dp.register_message_handler(cm_start_ad, commands="Load", state=None)
     dp.register_message_handler(load_photo, content_types=['photo'], state=FSMState_ad.photo)
-    dp.register_message_handler(cancel_handler_ad, state="*", commands='Delete')
+    dp.register_message_handler(cancel_handler_ad, state="*", commands='Back')
     dp.register_message_handler(cancel_handler_ad, Text(equals='delete', ignore_case=True), state="*")
     dp.register_message_handler(load_name, state=FSMState_ad.name)
     dp.register_message_handler(load_description, state=FSMState_ad.description)

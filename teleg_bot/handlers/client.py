@@ -1,6 +1,6 @@
 from aiogram import types, Dispatcher, filters
 from create_bot import dp, bot
-from keyboards import kb_client, tools_inline_keyboard, production_keyboard, learning_inline_keyboard, about_us_inline_keyboard, question_about_us_inline_keyboard, reviews_about_us_inline_keyboard, social_inline_keyboard, express_production_inline_keyboard
+from keyboards import kb_client,client_inline_keyboard, tools_inline_keyboard, production_keyboard, learning_inline_keyboard, about_us_inline_keyboard, question_about_us_inline_keyboard, reviews_about_us_inline_keyboard, social_inline_keyboard, express_production_inline_keyboard
 from aiogram.types import  Message, InlineKeyboardMarkup, InlineKeyboardButton
 from aiogram.dispatcher.filters import Text, Command
 from aiogram.dispatcher import FSMContext
@@ -32,39 +32,72 @@ async def contact_us(message: types.Message):
 #@dp.message_handler(commands=['start', 'help'])
 async def command_start(message : types.Message):
     try:
-        await bot.send_message(message.from_user.id, "Hello, I am Kulumkubot. Please press one of the following button.", reply_markup=kb_client)# qua da aggiungere la tastiera)
+        await bot.send_message(message.from_user.id, "Hello, I am Kulumkubot. Please press one of the following button.", reply_markup=client_inline_keyboard)# qua da aggiungere la tastiera)
         await message.delete() # per eliminare mess. non letti
     except:
         await message.reply("Chat with bot in direct: \nhttps://t.me/kulumkubot")
-        
+ 
+ #@dp.message_handler(commands=["Bot"])
+async def contact_bot(message: types.Message):
+    #await message.send_message(message.from_user.id, "Please press one of the following button: ", reply_markup=tools_inline_keyboard)
+     await bot.send_message(message.from_user.id, "Please press one of the following button: ", reply_markup=client_inline_keyboard) 
+     
+###############
+async def laern_and_service(query: types.CallbackQuery):
+    await query.answer()
+    await query.message.answer("Here's a new inline keyboard for LEARN AND SERVICE:", reply_markup=learning_inline_keyboard)  
+    
+async def shop_service(query: types.CallbackQuery):
+    read = await sqlite_db.sql_read2()
+    for ret in read:
+        await bot.send_photo(query.from_user.id, ret[0],f'{ret[1]}\nDescription: {ret[2]}\nPrice: {ret[-1]}')
+        kb = InlineKeyboardMarkup()
+        kb.add(InlineKeyboardButton(f'Add to cart {ret[1]}', callback_data=f'btn:buy {ret[1]}'))
+        kb.add(InlineKeyboardButton(text='Cart', callback_data='cart'))
+        await bot.send_message(query.from_user.id,text='press to ', reply_markup=kb)
+    try:
+        await db.add_users(query.chat.id)
+    except Exception as e :
+        pass
+    await query.answer()   
+
+async def production_service(query: types.CallbackQuery):
+    await query.answer()
+    await query.message.answer("Here's a new inline keyboard for PRODUCTION:", reply_markup=production_keyboard)
+    
+async def about_us_service(query: types.CallbackQuery):
+    await query.answer()
+    await query.message.answer("Here's a new inline keyboard for ABOUT US:", reply_markup=production_keyboard)
+  
+###################################################  
 
 #@dp.message_handler(commands=["Tools"])
-async def tools_command(message: types.Message):
+#async def tools_command(message: types.Message):
     #await message.send_message(message.from_user.id, "Please press one of the following button: ", reply_markup=tools_inline_keyboard)
-     await bot.send_message(message.from_user.id, "Please press one of the following button: ", reply_markup=tools_inline_keyboard)
+    #await bot.send_message(message.from_user.id, "Please press one of the following button: ", reply_markup=about_us_inline_keyboard)
 
 
 #@dp.message_handler(commands=["Production"])
-async def production_command(message: types.Message):
-     await bot.send_message(message.from_user.id, "Please press one of the following button: ", reply_markup=production_keyboard)
+#async def production_command(message: types.Message):
+     #await bot.send_message(message.from_user.id, "Please press one of the following button: ", reply_markup=production_keyboard)
     
 
 #@dp.message_handler(commands=["Learning"])
-async def learning_command(message: types.Message):
-     await bot.send_message(message.from_user.id, "Please press one of the following button: ", reply_markup=learning_inline_keyboard)
+#async def learning_command(message: types.Message):
+     #await bot.send_message(message.from_user.id, "Please press one of the following button: ", reply_markup=learning_inline_keyboard)
      
      
 #@dp.message_handler(commands=["About Us"])
-async def about_us_command(message: types.Message):
-     await bot.send_message(message.from_user.id, "Please press one of the following button: ", reply_markup=about_us_inline_keyboard)
+#async def about_us_command(message: types.Message):
+    # await bot.send_message(message.from_user.id, "Please press one of the following button: ", reply_markup=about_us_inline_keyboard)
 
 
 
         
 # decor. con gg di lavoro
 #@dp.message_handler(commands=["Open"])
-async def open_command(message : types.Message):
-    await bot.send_message(message.from_id, 'Mon - Sat, 9:00 - 20:00')
+#async def open_command(message : types.Message):
+    #await bot.send_message(message.from_id, 'Mon - Sat, 9:00 - 20:00')
     
 # decor. con indirizzo
 #@dp.message_handler(commands=["Address"])
@@ -92,7 +125,7 @@ async def social_callback(query: types.CallbackQuery):
     await query.answer()
     await query.message.answer("Here's a new inline keyboard social:", reply_markup=social_inline_keyboard)
    
- 
+""" 
 #@dp.message_handler(commands=['Shop'])
 async def shop_command(message : types.Message):
     #await sqlite_db.sql_read(message)
@@ -107,6 +140,7 @@ async def shop_command(message : types.Message):
         await db.add_users(message.chat.id)
     except Exception as e :
         pass
+    """
     
 #@dp.callback_query_handler(lambda x: x.data == 'cart')
 async def cart(call: types.CallbackQuery):
@@ -244,16 +278,21 @@ async def empty_cart(message: Message):
 def register_handers_client(dp : Dispatcher):
     dp.register_message_handler(contact_us, commands=['contact_us'])
     dp.register_message_handler(command_start, commands=['start', 'help'])
-    dp.register_message_handler(tools_command, commands=['Tools'])
-    dp.register_message_handler(production_command, commands=["Production"])
-    dp.register_message_handler(learning_command, commands=["Learning"])
-    dp.register_message_handler(about_us_command, commands=["About"])
-    dp.register_message_handler(open_command, commands=["Open"]) 
+    dp.register_message_handler(contact_bot, commands=['Bot'])
+    dp.register_callback_query_handler(laern_and_service, text='button1_in')
+    dp.register_callback_query_handler(shop_service, text='button2_in')
+    dp.register_callback_query_handler(production_service, text='button3_in')
+    dp.register_callback_query_handler(about_us_service, text='button4_in')
+    #dp.register_message_handler(tools_command, commands=['Tools'])
+    #dp.register_message_handler(production_command, commands=["Production"])
+    #dp.register_message_handler(learning_command, commands=["Learning"])
+    #dp.register_message_handler(about_us_command, commands=["About"])
+    #dp.register_message_handler(open_command, commands=["Open"]) 
     dp.register_message_handler(adress_command, commands=["Address"])
     dp.register_callback_query_handler(question_about_us_callback, text='questions about us')
     dp.register_callback_query_handler(reviews_about_us_callback, text='reviews_about_us')
     dp.register_callback_query_handler(social_callback, text='social')
-    dp.register_message_handler(shop_command, commands=['Shop'])
+    #dp.register_message_handler(shop_command, commands=['Shop'])
     dp.register_callback_query_handler(cart, lambda x: x.data == 'cart')
     dp.register_callback_query_handler(add_to_cart, cb.filter(type='buy'))
     dp.register_callback_query_handler(minus, cb.filter(type='minus'))
